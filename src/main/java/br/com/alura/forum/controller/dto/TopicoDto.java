@@ -8,21 +8,21 @@ import br.com.alura.forum.model.Topico;
 
 public class TopicoDto {
 
-	// private long id;
+	private long id;
 	private String titulo;
 	private String mensagem;
 	private LocalDateTime dataCriacao;
 
 	public TopicoDto(Topico topico) {
-		// this.id = topico.getId();
+		 this.id = topico.getId();
 		this.titulo = topico.getTitulo();
 		this.mensagem = topico.getMensagem();
 		this.dataCriacao = topico.getDataCriacao();
 	}
 
-//	public long getId() {
-//		return id;
-//	}
+	public long getId() {
+		return id;
+	}
 
 	public String getTitulo() {
 		return titulo;
