@@ -7,6 +7,8 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -31,17 +33,18 @@ import br.com.alura.forum.model.Topico;
 import br.com.alura.forum.model.repository.CursoRepository;
 import br.com.alura.forum.model.repository.TopicoRepository;
 
-@RestController
+@RestController // Controle REST, para substituir os (ResponseBody) dos metodos
 @RequestMapping("/topicos")
 public class TopicosController {
 
-	@Autowired
+	@Autowired // Auto injeção de dependencia do spring
 	private TopicoRepository topicoRepository;
 
-	@Autowired
+	@Autowired // Auto injeção de dependencia do spring
 	private CursoRepository cursoRepository;
 
 	@GetMapping
+	@Cacheable(value = "listaDeTopicos") // Armazena o resultado em cache
 	public Page<TopicoDto> listar(@RequestParam(required = false) String nomeCurso,
 			@PageableDefault(sort = "id", page = 0, size = 10, direction = Direction.DESC) Pageable paginacao) {
 
@@ -64,7 +67,8 @@ public class TopicosController {
 	}
 
 	@PostMapping
-	@Transactional
+	@Transactional // Indica o hibernate que o metodo é uma transação
+	@CacheEvict(cacheNames = "listaDeTopicos", allEntries = true) // Ao executar o metodo, cache será ser limpado
 	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm topicoForm, UriComponentsBuilder uriCB) {
 
 		Topico topico = topicoForm.converter(cursoRepository);
@@ -74,8 +78,9 @@ public class TopicosController {
 		return ResponseEntity.created(uri).body(new TopicoDto(topico));
 	}
 
-	@Transactional
+	@Transactional // Indica o hibernate que o metodo é uma transação
 	@PutMapping("/{id}")
+	@CacheEvict(cacheNames = "listaDeTopicos", allEntries = true) // Ao executar o metodo, cache será ser limpado
 	public ResponseEntity<TopicoDto> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizacaoTopicoForm form) {
 
 		Optional<Topico> optional = topicoRepository.findById(id);
@@ -86,8 +91,9 @@ public class TopicosController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@Transactional
+	@Transactional // Indica o hibernate que o metodo é uma transação
 	@DeleteMapping("/{id}")
+	@CacheEvict(cacheNames = "listaDeTopicos", allEntries = true) // Ao executar o metodo, cache será ser limpado
 	public ResponseEntity<?> remover(@PathVariable Long id) {
 
 		if (topicoRepository.findById(id).isPresent()) {
